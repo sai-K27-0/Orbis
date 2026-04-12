@@ -294,6 +294,35 @@ select.fi option{background:var(--surf2)}
 .gcal-btn svg{width:14px;height:14px;display:block}
 
 @media(max-width:820px){.today-panel{grid-template-columns:1fr}}
+
+/* ── OBSIDIAN SYNC INDICATOR ─────────── */
+.obs-ind{
+  display:none;align-items:center;gap:6px;
+  margin:auto 10px 6px;padding:6px 10px;
+  border-radius:var(--r-sm);border:1px solid rgba(155,125,232,.25);
+  background:rgba(155,125,232,.08);color:var(--pur);
+  font-size:11px;font-weight:600;cursor:default;
+}
+.obs-ind svg{flex-shrink:0;opacity:.8}
+.obs-dot{width:6px;height:6px;border-radius:50%;background:var(--pur);flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.obs-task-tag{
+  font-size:9.5px;font-weight:700;letter-spacing:.04em;
+  padding:1px 5px;border-radius:3px;
+  background:rgba(155,125,232,.15);color:var(--pur);
+  border:1px solid rgba(155,125,232,.3);margin-left:auto;
+}
+.ab.ia{background:rgba(99,102,241,.12);color:#818cf8;border-color:#818cf8}
+.ab.exam{background:rgba(245,158,11,.12);color:#f59e0b;border-color:#f59e0b}
+.ab.tok{background:rgba(20,184,166,.12);color:var(--tok);border-color:var(--tok)}
+.ab.ee{background:rgba(99,102,241,.12);color:var(--ee);border-color:var(--ee)}
+.tdone{opacity:.55}
+.tawait{border-left:3px solid #eab308 !important}
+.del-btn{background:none;border:none;color:var(--t3);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;flex-shrink:0}
+.del-btn:hover{color:var(--red);background:var(--red-bg)}
+.bar-wrap{flex:1;display:flex;align-items:flex-end;height:60px}
+.bar{width:100%;background:var(--acc);border-radius:3px 3px 0 0;min-height:2px;transition:.3s}
+
 </style>
 </head>
 <body>
@@ -319,6 +348,12 @@ select.fi option{background:var(--surf2)}
   <button class="nb" data-tab="grades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Grade Calc</button>
   <button class="nb" data-tab="countdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Countdown</button>
   <button class="nb" data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Notes</button>
+  <!-- Obsidian sync status -->
+  <div class="obs-ind" id="obsidianInd" title="Tasks synced from Obsidian vault">
+    <span class="obs-dot"></span>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+    Obsidian&nbsp;<span class="obs-count" style="font-weight:700">0</span>&nbsp;tasks
+  </div>
 </nav>
 
 <!-- ═══ BOTTOM BAR ══════════════════════ -->
@@ -549,7 +584,7 @@ const SUBJ={
   tok:{n:'TOK',          lv:'Core',     c:'#14b8a6',ia:'—',t:'Essay + Exhibition'},
   cas:{n:'CAS',          lv:'Core',     c:'#eab308',ia:'—',t:'3 strands'},
 };
-const ATYPE={fa:{l:'FA',cls:'fa'},steam:{l:'STEAM',cls:'steam'},wt:{l:'WT',cls:'wt'},sdl:{l:'SDL',cls:'sdl'},hw:{l:'HW',cls:'hw'}};
+const ATYPE={fa:{l:'FA',cls:'fa'},steam:{l:'STEAM',cls:'steam'},wt:{l:'WT',cls:'wt'},sdl:{l:'SDL',cls:'sdl'},hw:{l:'HW',cls:'hw'},ia:{l:'IA',cls:'ia'},exam:{l:'EXAM',cls:'exam'},tok:{l:'TOK',cls:'tok'},ee:{l:'EE',cls:'ee'}};
 const BONUS=[[3,3,2,2,0],[3,3,2,1,0],[2,2,1,0,0],[2,1,0,0,0],[0,0,0,0,0]];
 const DAYS_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -575,7 +610,8 @@ let taskFilter='all', taskSearch='';
 function J(k,d){try{return JSON.parse(localStorage.getItem(k)||d)}catch{return JSON.parse(d)}}
 function ls(k,d){return localStorage.getItem(k)||d}
 function save(){
-  localStorage.setItem('ib_tasks',JSON.stringify(tasks));
+  // Only persist locally-created tasks — Obsidian tasks are re-loaded from data/tasks.json each time
+  localStorage.setItem('ib_tasks',JSON.stringify(tasks.filter(t=>t.source!=='obsidian')));
   localStorage.setItem('ib_core',JSON.stringify(core));
   localStorage.setItem('ib_grades',JSON.stringify(grades));
   localStorage.setItem('ib_notes',JSON.stringify(notes));
@@ -622,7 +658,7 @@ function renderAll(){
   renderCalendar();renderTimetable();renderFATracker();
   startCdTick();
   // badges
-  const urg=tasks.filter(t=>!t.done&&t.due&&daysLeft(t.due)<=7).length;
+  const urg=tasks.filter(t=>!t.done&&t.due&&daysLeft(t.due)<=7&&!t.awaiting_score).length;
   ['sdgBadge'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.display=urg?'':'none';el.textContent=urg;}});
   const dot=document.getElementById('bbDot');if(dot)dot.style.display=urg?'block':'none';
   // notes
@@ -635,8 +671,8 @@ function renderStats(){
   const el=document.getElementById('statsRow');if(!el)return;
   const active=tasks.filter(t=>!t.done);
   const fa=active.filter(t=>t.type==='fa');
-  const urg=active.filter(t=>t.due&&daysLeft(t.due)<=7);
-  const od=active.filter(t=>t.due&&daysLeft(t.due)<0);
+  const urg=active.filter(t=>t.due&&daysLeft(t.due)<=7&&!t.awaiting_score&&t.type!=='exam');
+  const od=active.filter(t=>t.due&&daysLeft(t.due)<0&&!t.awaiting_score);
   el.innerHTML=`
     <div class="sbox"><div class="sval">${active.length}</div><div class="slbl2">Active tasks</div></div>
     <div class="sbox"><div class="sval" style="color:var(--red)">${fa.length}</div><div class="slbl2">FA upcoming</div></div>
@@ -656,480 +692,419 @@ function renderFAAlert(){
 // urgent
 function renderUrgent(){
   const el=document.getElementById('urgentList');if(!el)return;
-  const urg=tasks.filter(t=>!t.done&&t.due&&daysLeft(t.due)<=7).sort((a,b)=>new Date(a.due)-new Date(b.due));
+  const urg=tasks.filter(t=>!t.done&&t.due&&daysLeft(t.due)<=7&&!t.awaiting_score&&t.type!=='exam').sort((a,b)=>new Date(a.due)-new Date(b.due));
   el.innerHTML=urg.length?urg.map(t=>taskHTML(t,tasks.indexOf(t))).join(''):'<div class="empty">Nothing due this week 🎉</div>';
 }
 
 // study chart (last 7 days)
 function renderStudyChart(){
   const bc=document.getElementById('studyChart');const lc=document.getElementById('studyLabels');
-  if(!bc||!lc)return;
+  if(\!bc||\!lc)return;
   const days=[];const now=new Date();
   for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d);}
   const maxM=Math.max(1,...days.map(d=>{const k=d.toISOString().slice(0,10);return studyLog[k]||0;}));
   bc.innerHTML=days.map(d=>{
     const k=d.toISOString().slice(0,10);const m=studyLog[k]||0;
-    const h=Math.round(m/maxM*100)||2;
-    const isToday=k===todayKey();
-    return`<div class="chart-bar" style="height:${h}%;background:${isToday?'var(--acc)':'var(--b2)'};flex:1" title="${m} min"></div>`;
+    const pct=maxM?Math.round((m/maxM)*100):0;
+    return`<div class="bar-wrap"><div class="bar" style="height:${pct}%" title="${m}m"></div></div>`;
   }).join('');
-  lc.innerHTML=days.map(d=>`<div class="chart-label">${DAYS_SHORT[d.getDay()]}</div>`).join('');
+  lc.innerHTML=days.map(d=>`<div>${DAYS_SHORT[d.getDay()]}</div>`).join('');
 }
 
-// core snap
+// IB Core snapshot on overview
 function renderCoreSnap(){
-  const el=document.getElementById('coreSnap');if(!el)return;
-  el.innerHTML=[
-    {l:'Extended Essay',v:core.eeW,m:4000,c:'#6366f1'},
-    {l:'TOK Essay',v:core.tokW,m:1600,c:'#14b8a6'},
-    {l:'CAS Total',v:core.casC+core.casA+core.casS,m:150,c:'#eab308'},
-  ].map(b=>`<div class="card" style="margin-bottom:8px">
-    <div class="pl"><span style="font-size:13px;font-weight:600">${b.l}</span><span>${b.v} / ${b.m}</span></div>
-    <div class="pb"><div class="pf" style="width:${Math.min(b.v/b.m*100,100)}%;background:${b.c}"></div></div>
-  </div>`).join('');
+  const el=document.getElementById('coreSnap');if(\!el)return;
+  el.innerHTML=`
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div class="sbox"><div class="sval" style="color:var(--ee)">${core.eeW||0}<span style="font-size:13px">/4000</span></div><div class="slbl2">EE words</div></div>
+      <div class="sbox"><div class="sval" style="color:var(--tok)">${core.tokW||0}/1200</div><div class="slbl2">TOK Essay</div></div>
+      <div class="sbox"><div class="sval" style="color:var(--tok)">${core.tokO||0}/950</div><div class="slbl2">TOK Exhibition</div></div>
+      <div class="sbox"><div class="sval" style="color:var(--cas)">${core.casC||0}</div><div class="slbl2">CAS Creativity</div></div>
+      <div class="sbox"><div class="sval" style="color:var(--cas)">${core.casA||0}</div><div class="slbl2">CAS Activity</div></div>
+      <div class="sbox"><div class="sval" style="color:var(--cas)">${core.casS||0}</div><div class="slbl2">CAS Service</div></div>
+    </div>`;
 }
 
-// task row HTML
-function taskHTML(t,idx){
-  const days=daysLeft(t.due);
-  let dc='due-o',dl=fmtDate(t.due);
-  if(days!==null){if(days<0){dc='due-u';dl='Overdue';}else if(days===0){dc='due-u';dl='Today';}else if(days<=3){dc='due-u';dl=days+'d';}else if(days<=7){dc='due-s';dl=days+'d';}}
-  const s=SUBJ[t.subject]||{n:t.subject,c:'#5b8def'};const at=ATYPE[t.type]||ATYPE.hw;
-  return`<div class="trow${t.type==='fa'?' fa-row':''}">
-    <div class="tchk${t.done?' done':''}" onclick="toggle(${idx})"></div>
-    <div class="tdot" style="background:${s.c}"></div>
-    <div class="tinfo">
+// Today's upcoming tasks panel
+function renderTodayPanel(){
+  const el=document.getElementById('todayList');if(\!el)return;
+  const today=todayKey();
+  const todayT=tasks.filter(t=>\!t.done&&t.due===today);
+  el.innerHTML=todayT.length
+    ?todayT.map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b1)">
+        <span class="ab ${(ATYPE[t.type]||{cls:'hw'}).cls}">${(ATYPE[t.type]||{l:t.type}).l}</span>
+        <span style="font-size:13px;font-weight:500">${esc(t.name)}</span>
+        <span style="font-size:11px;color:${(SUBJ[t.subject]||{c:'#888'}).c};margin-left:auto">${(SUBJ[t.subject]||{n:t.subject}).n}</span>
+      </div>`).join('')
+    :'<div class="empty">Nothing due today</div>';
+}
+
+// ═══ TASK HTML ══════════════════════════
+function taskHTML(t, idx){
+  const dl=daysLeft(t.due);
+  const subj=SUBJ[t.subject]||{n:t.subject||'—',c:'#888'};
+  const at=ATYPE[t.type]||{l:(t.type||'').toUpperCase(),cls:'hw'};
+  let dueHtml='';
+  if(t.awaiting_score){
+    dueHtml=`<span class="tdue" style="background:rgba(234,179,8,.12);color:#eab308;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600">⏳ Awaiting Score</span>`;
+  } else if(t.due){
+    const ov=dl<0,urg=dl\!==null&&dl<=3,warn=dl\!==null&&dl<=7;
+    const col=ov||urg?'var(--red)':warn?'var(--amb)':'var(--t3)';
+    const bg=ov||urg?'var(--red-bg)':warn?'var(--amb-bg)':'transparent';
+    const lbl=ov?`${Math.abs(dl)}d overdue`:dl===0?'Today':dl===1?'Tomorrow':`${dl}d left`;
+    dueHtml=`<span class="tdue" style="background:${bg};color:${col}">${fmtDate(t.due)} · ${lbl}</span>`;
+  } else {
+    dueHtml=`<span style="font-size:11px;color:var(--t3)">No due date</span>`;
+  }
+  return`<div class="trow${t.done?' tdone':''}${t.awaiting_score?' tawait':''}">
+    <div class="tchk${t.done?' done':''}" onclick="toggleDone(${idx})"></div>
+    <div style="flex:1;min-width:0">
       <div class="tname${t.done?' done':''}">${esc(t.name)}</div>
-      <div class="tsub"><span>${s.n}</span><span class="ab ${at.cls}">${at.l}</span></div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap">
+        <span class="ab ${at.cls}">${at.l}</span>
+        <span style="font-size:11px;font-weight:600;color:${subj.c}">${subj.n}</span>
+        ${dueHtml}
+      </div>
     </div>
-    ${t.due?`<div class="tdue ${dc}">${dl}</div>`:''}
-    ${t.due?gcalLink(t):''}
-    <button class="tdel" onclick="delTask(${idx})">×</button>
+    ${t.source\!=='obsidian'?`<button class="del-btn" onclick="deleteTask(${idx})" title="Delete">✕</button>`:''}
   </div>`;
 }
 
-function applyFilter(list){
-  return list.filter(t=>{
-    if(taskFilter!=='all'&&t.type!==taskFilter)return false;
-    if(taskSearch&&!t.name.toLowerCase().includes(taskSearch)&&!(SUBJ[t.subject]?.n||'').toLowerCase().includes(taskSearch))return false;
-    return true;
-  });
-}
+// ═══ RENDER TASK LISTS ══════════════════
 function renderTaskLists(){
-  const showFA=taskFilter==='all'||taskFilter==='fa';
-  const faT=applyFilter(tasks.filter(t=>!t.done&&t.type==='fa')).sort((a,b)=>new Date(a.due)-new Date(b.due));
-  const fl=document.getElementById('faList');const fll=document.getElementById('faLabel');
-  if(fll)fll.style.display=(faT.length&&showFA)?'block':'none';
-  if(fl)fl.innerHTML=showFA?faT.map(t=>taskHTML(t,tasks.indexOf(t))).join(''):'';
+  const fl=document.getElementById('faList');
   const al=document.getElementById('activeList');
-  if(al){
-    const others=taskFilter==='fa'?[]:applyFilter(tasks.filter(t=>!t.done&&t.type!=='fa')).sort((a,b)=>{if(!a.due&&!b.due)return 0;if(!a.due)return 1;if(!b.due)return-1;return new Date(a.due)-new Date(b.due)});
-    al.innerHTML=others.length?others.map(t=>taskHTML(t,tasks.indexOf(t))).join(''):'<div class="empty">No tasks match this filter</div>';
-  }
   const dl=document.getElementById('doneList');
-  if(dl){const done=tasks.filter(t=>t.done).slice(-8).reverse();dl.innerHTML=done.map(t=>taskHTML(t,tasks.indexOf(t))).join('')||'<div class="empty">Completed tasks appear here</div>';}
-}
-
-function addTask(){
-  const n=document.getElementById('newTask').value.trim();if(!n)return;
-  tasks.push({name:n,subject:document.getElementById('newSubj').value,type:document.getElementById('newType').value,due:document.getElementById('newDue').value,done:false});
-  save();document.getElementById('newTask').value='';document.getElementById('newDue').value='';renderAll();
-}
-function toggle(i){tasks[i].done=!tasks[i].done;save();renderAll();}
-function delTask(i){tasks.splice(i,1);save();renderAll();}
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.activeElement.id==='newTask')addTask();});
-
-// ═══ CALENDAR ═══════════════════════════
-function renderCalendar(){
-  const grid=document.getElementById('calGrid');if(!grid)return;
-  document.getElementById('calTitle').textContent=`${MONTHS[calMonth]} ${calYear}`;
-  const first=new Date(calYear,calMonth,1);
-  const startDow=(first.getDay()+6)%7; // Monday=0
-  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
-  const prevDays=new Date(calYear,calMonth,0).getDate();
-  const today=new Date();
-
-  // build task map: key=YYYY-MM-DD → tasks[]
-  const taskMap={};
-  tasks.filter(t=>!t.done&&t.due).forEach(t=>{
-    (taskMap[t.due]=taskMap[t.due]||[]).push(t);
-  });
-
-  // day headers
-  const heads=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div class="cal-dow">${d}</div>`).join('');
-  let cells='';
-  // prev month
-  for(let i=startDow-1;i>=0;i--){
-    cells+=`<div class="cal-cell other-month"><div class="cal-date">${prevDays-i}</div></div>`;
+  if(\!al)return;
+  let active=tasks.filter(t=>\!t.done);
+  let done=tasks.filter(t=>t.done);
+  // search filter
+  if(taskSearch){
+    const q=taskSearch.toLowerCase();
+    active=active.filter(t=>t.name.toLowerCase().includes(q)||(t.subject||'').toLowerCase().includes(q));
+    done=done.filter(t=>t.name.toLowerCase().includes(q));
   }
-  // this month
-  for(let d=1;d<=daysInMonth;d++){
-    const dt=new Date(calYear,calMonth,d);
-    const key=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday=dt.toDateString()===today.toDateString();
-    const dayTasks=taskMap[key]||[];
-    const hasFa=dayTasks.some(t=>t.type==='fa');
-    const dots=dayTasks.slice(0,6).map(t=>{
-      const c=SUBJ[t.subject]?.c||'#5b8def';
-      return t.type==='fa'?`<div class="cal-fa-ring" title="${esc(t.name)}"></div>`:`<div class="cal-dot" style="background:${c}" title="${esc(t.name)}"></div>`;
-    }).join('');
-    cells+=`<div class="cal-cell${isToday?' today':''}${hasFa?' has-fa':''}" onclick="calDayClick('${key}',${d})">
-      <div class="cal-date" style="${isToday?'color:var(--acc);font-weight:700':''}">${d}</div>
-      <div class="cal-dots">${dots}</div>
+  // type filter
+  if(taskFilter\!=='all'){
+    active=active.filter(t=>t.type===taskFilter);
+    done=done.filter(t=>t.type===taskFilter);
+  }
+  // FAs separate
+  const fas=active.filter(t=>t.type==='fa').sort((a,b)=>new Date(a.due||'9999')-new Date(b.due||'9999'));
+  const rest=active.filter(t=>t.type\!=='fa').sort((a,b)=>{
+    if(a.awaiting_score&&\!b.awaiting_score)return 1;
+    if(\!a.awaiting_score&&b.awaiting_score)return -1;
+    if(\!a.due&&\!b.due)return 0;
+    if(\!a.due)return 1;
+    if(\!b.due)return-1;
+    return new Date(a.due)-new Date(b.due);
+  });
+  if(fl){
+    const faLabel=document.getElementById('faLabel');
+    if(fas.length&&(taskFilter==='all'||taskFilter==='fa')){
+      if(faLabel)faLabel.style.display='';
+      fl.innerHTML=fas.map(t=>taskHTML(t,tasks.indexOf(t))).join('');
+    } else {
+      if(faLabel)faLabel.style.display='none';
+      fl.innerHTML='';
+    }
+  }
+  al.innerHTML=rest.length?rest.map(t=>taskHTML(t,tasks.indexOf(t))).join(''):'<div class="empty">No tasks here</div>';
+  if(dl)dl.innerHTML=done.length?done.map(t=>taskHTML(t,tasks.indexOf(t))).join(''):'<div class="empty" style="opacity:.4">Nothing completed yet</div>';
+}
+
+// ═══ TASK CRUD ════════════════════════
+function addTask(){
+  const name=document.getElementById('newTask').value.trim();
+  if(\!name)return;
+  const subj=document.getElementById('newSubj').value;
+  const type=document.getElementById('newType').value;
+  const due=document.getElementById('newDue').value||null;
+  tasks.push({id:'local-'+Date.now(),name,subject:subj,type,due,done:false,source:'local'});
+  save();document.getElementById('newTask').value='';renderAll();
+}
+function toggleDone(i){
+  if(i<0||i>=tasks.length)return;
+  if(tasks[i].source==='obsidian'){tasks[i].done=\!tasks[i].done;}
+  else{tasks[i].done=\!tasks[i].done;save();}
+  renderAll();
+}
+function deleteTask(i){
+  if(tasks[i].source==='obsidian')return;
+  tasks.splice(i,1);save();renderAll();
+}
+function setTaskFilter(f){
+  taskFilter=f;
+  document.querySelectorAll('.ftag').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
+  renderTaskLists();
+}
+function onTaskSearch(){taskSearch=document.getElementById('taskSearch').value;renderTaskLists();}
+
+// ═══ SUBJECTS ════════════════════════
+function renderSubjects(){
+  const el=document.getElementById('subjCards');if(\!el)return;
+  el.innerHTML=Object.entries(SUBJ).map(([k,s])=>{
+    const pending=tasks.filter(t=>\!t.done&&t.subject===k).length;
+    return`<div class="card scard">
+      <div class="stripe" style="background:${s.c}"></div>
+      <div class="slvl" style="background:${s.c}22;color:${s.c}">${s.lv}</div>
+      <div class="sname">${s.n}</div>
+      <div class="smeta"><span>${s.t}</span><span class="sia" style="background:${s.c}22;color:${s.c}">${s.ia}</span></div>
+      ${pending?`<div style="margin-top:10px;font-size:11.5px;color:var(--t2)">${pending} task${pending>1?'s':''} pending</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ═══ IB CORE ═════════════════════════
+function renderIBCore(){
+  const el=document.getElementById('ibcoreContent');if(\!el)return;
+  function inp(id,label,val,max,col,key){
+    return`<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:600;color:${col}">${label}</span>
+        <span style="font-size:12px;color:var(--t2)">${val}/${max}</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="flex:1;height:8px;background:var(--b1);border-radius:4px;overflow:hidden">
+          <div style="width:${Math.min(100,(val/max)*100)}%;height:100%;background:${col};border-radius:4px;transition:.3s"></div>
+        </div>
+        <input type="number" class="fi" style="width:80px" value="${val}" min="0" max="${max}"
+          oninput="core['${key}']=+this.value;save();renderIBCore()"/>
+      </div>
     </div>`;
   }
-  // next month fill
-  const total=startDow+daysInMonth;const trailing=(7-total%7)%7;
-  for(let i=1;i<=trailing;i++)cells+=`<div class="cal-cell other-month"><div class="cal-date">${i}</div></div>`;
-  grid.innerHTML=heads+cells;
+  el.innerHTML=`<div class="card" style="max-width:520px">
+    ${inp('eeW','EE Word Count',core.eeW||0,4000,'var(--ee)','eeW')}
+    ${inp('tokW','TOK Essay Words',core.tokW||0,1200,'var(--tok)','tokW')}
+    ${inp('tokO','TOK Exhibition Notes',core.tokO||0,950,'var(--tok)','tokO')}
+    ${inp('casC','CAS — Creativity sessions',core.casC||0,50,'var(--cas)','casC')}
+    ${inp('casA','CAS — Activity sessions',core.casA||0,50,'var(--cas)','casA')}
+    ${inp('casS','CAS — Service sessions',core.casS||0,50,'var(--cas)','casS')}
+  </div>`;
 }
 
+// ═══ GRADES ══════════════════════════
+const SUBJ_KEYS=['ma','cs','bm','sp','ch','en'];
+function renderGrades(){
+  const el=document.getElementById('gradeRows');if(\!el)return;
+  el.innerHTML=SUBJ_KEYS.map(k=>{
+    const s=SUBJ[k];const g=grades[k]||0;
+    return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="flex:1;font-size:13px;font-weight:500;color:${s.c}">${s.n}</span>
+      <select class="fi" style="width:70px" onchange="grades['${k}']=+this.value;save();calcGrades()">
+        ${[0,1,2,3,4,5,6,7].map(v=>`<option value="${v}" ${g===v?'selected':''}>${v||'—'}</option>`).join('')}
+      </select>
+    </div>`;
+  }).join('');
+  calcGrades();
+}
+function calcGrades(){
+  const pts=SUBJ_KEYS.reduce((s,k)=>s+(grades[k]||0),0);
+  const ee=document.getElementById('eeG')?.value||'';
+  const tok=document.getElementById('tokG')?.value||'';
+  const ei=['A','B','C','D','E'].indexOf(ee);
+  const ti=['A','B','C','D','E'].indexOf(tok);
+  const bonus=(ei>=0&&ti>=0)?BONUS[ei][ti]:0;
+  const total=pts+bonus;
+  document.getElementById('bonusPts').textContent=`+${bonus}`;
+  const tEl=document.getElementById('totalGrade');
+  if(tEl){tEl.textContent=total||'—';tEl.style.color=total>=40?'var(--grn)':total>=35?'var(--amb)':'var(--t1)';}
+  const band=total>=45?'Perfect score\!':total>=40?'Excellent — Bilingual diploma range':total>=35?'Strong — well above pass':total>=28?'Diploma likely':total>=24?'Pass threshold area':'Building towards diploma';
+  const bEl=document.getElementById('gradeBand');if(bEl)bEl.textContent=total?band:'';
+}
+
+// ═══ TIMER ════════════════════════════
+let tInt=null,tSec=0,tRunning=false,tFocus=true,tLen=25*60,tBreak=5*60;
+function toggleTimer(){
+  if(tRunning){clearInterval(tInt);tRunning=false;document.getElementById('tBtn').textContent='Resume';}
+  else{tRunning=true;document.getElementById('tBtn').textContent='Pause';
+    tInt=setInterval(()=>{
+      tSec--;updateRing();
+      if(tSec<=0){clearInterval(tInt);tRunning=false;
+        if(tFocus){tSess++;tMin+=tLen/60;localStorage.setItem('ib_tsess',tSess);localStorage.setItem('ib_tmin',tMin);renderStats();}
+        tFocus=\!tFocus;tSec=tFocus?tLen:tBreak;
+        document.getElementById('tPhase').textContent=tFocus?'Focus':'Break';
+        document.getElementById('tBtn').textContent='Start';
+        updateRing();try{new Audio('').play();}catch(e){}
+      }
+    },1000);
+  }
+}
+function resetTimer(){clearInterval(tInt);tRunning=false;tFocus=true;tSec=tLen;
+  document.getElementById('tBtn').textContent='Start';
+  document.getElementById('tPhase').textContent='Focus';updateRing();}
+function setPreset(m,phase){clearInterval(tInt);tRunning=false;tLen=m*60;tSec=m*60;tFocus=phase\!=='Break';
+  document.getElementById('tPhase').textContent=phase;
+  document.getElementById('tBtn').textContent='Start';updateRing();}
+function updateRing(){
+  const total=tFocus?tLen:tBreak;const pct=tSec/total;
+  const circ=628.32;const offset=circ*(1-pct);
+  const ring=document.getElementById('tRing');if(ring)ring.style.strokeDashoffset=offset;
+  const m=Math.floor(tSec/60),s=tSec%60;
+  const el=document.getElementById('tDisp');if(el)el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function renderTimerStats(){
+  const el=document.getElementById('tStats');if(\!el)return;
+  el.innerHTML=`<div style="font-size:13px;color:var(--t2)">${tSess} pomodoros · ${(tMin/60).toFixed(1)}h total</div>`;
+}
+
+// ═══ COUNTDOWN ═══════════════════════
+let cdTick=null;
+function startCdTick(){
+  const inp=document.getElementById('examDate');if(\!inp)return;
+  if(\!examStr&&\!inp.value){const el=document.getElementById('cdDisp');if(el)el.innerHTML='<div style="color:var(--t2);font-size:14px">Set your first exam date above</div>';return;}
+  if(\!inp.value&&examStr)inp.value=examStr;
+  if(cdTick)clearInterval(cdTick);
+  function tick(){
+    const target=new Date(inp.value||examStr);target.setHours(8,15,0);
+    const diff=target-new Date();const el=document.getElementById('cdDisp');if(\!el)return;
+    if(diff<=0){el.innerHTML='<div style="color:var(--grn);font-size:22px;font-weight:700">Exams are here\! Good luck\! 🎓</div>';return;}
+    const d=Math.floor(diff/864e5),h=Math.floor((diff%864e5)/36e5),m=Math.floor((diff%36e5)/6e4),s=Math.floor((diff%6e4)/1e3);
+    el.innerHTML=`<div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+      ${[[d,'Days'],[h,'Hours'],[m,'Minutes'],[s,'Seconds']].map(([v,l])=>`<div style="text-align:center"><div style="font-size:36px;font-weight:700;font-family:var(--mono);color:var(--acc)">${v}</div><div style="font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:.1em">${l}</div></div>`).join('')}
+    </div>`;
+  }
+  tick();cdTick=setInterval(tick,1000);
+}
+function saveExam(){examStr=document.getElementById('examDate').value;localStorage.setItem('ib_exam',examStr);}
+
+// ═══ CALENDAR ═════════════════════════
+function renderCalendar(){
+  const el=document.getElementById('calGrid');const tl=document.getElementById('calTitle');if(\!el)return;
+  const year=calYear,month=calMonth;
+  if(tl)tl.textContent=`${MONTHS[month]} ${year}`;
+  const first=new Date(year,month,1).getDay();
+  const days=new Date(year,month+1,0).getDate();
+  const todayStr=todayKey();
+  // day headers
+  let html=DAYS_SHORT.map(d=>`<div class="cal-hdr">${d}</div>`).join('');
+  // blank cells
+  for(let i=0;i<first;i++)html+=`<div class="cal-day cal-empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasTasks=tasks.filter(t=>t.due===dateStr&&\!t.done).length;
+    const isToday=dateStr===todayStr;
+    html+=`<div class="cal-day${isToday?' cal-today':''}" onclick="showCalDay('${dateStr}')">
+      <div class="cal-num${isToday?' cal-num-today':''}">${d}</div>
+      ${hasTasks?`<div class="cal-dot" title="${hasTasks} task${hasTasks>1?'s':''}"></div>`:''}
+    </div>`;
+  }
+  el.innerHTML=html;
+}
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
 function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
-function calDayClick(key,d){
-  const detail=document.getElementById('calDayDetail');if(!detail)return;
-  const dayTasks=tasks.filter(t=>t.due===key&&!t.done);
-  if(!dayTasks.length){detail.innerHTML='';return;}
-  detail.innerHTML=`<div class="slabel">${fmtDateFull(key)}</div>`+dayTasks.map(t=>taskHTML(t,tasks.indexOf(t))).join('');
+function showCalDay(dateStr){
+  const el=document.getElementById('calDayDetail');if(\!el)return;
+  const day=tasks.filter(t=>t.due===dateStr);
+  if(\!day.length){el.innerHTML='';return;}
+  el.innerHTML=`<div class="card"><div class="slabel" style="margin-bottom:10px">${fmtDateFull(dateStr)}</div>
+    ${day.map(t=>taskHTML(t,tasks.indexOf(t))).join('')}</div>`;
 }
 
-// ═══ TIMETABLE ══════════════════════════
+// ═══ TIMETABLE ═══════════════════════
 function renderTimetable(){
-  const grid=document.getElementById('ttGrid');if(!grid)return;
-  const now=new Date();const curDow=(now.getDay()+6)%7; // Mon=0
-  const curHour=now.getHours();
-  // rough period by hour: 8=P1,9=P2,10=P3,11=P4,13=P5,14=P6,15=P7
-  const periodHours=[8,9,10,11,13,14,15];
-  const curPeriod=periodHours.findIndex((h,i)=>curHour===h||(i<periodHours.length-1&&curHour>h&&curHour<periodHours[i+1]));
-
-  let html=`<div></div>${WEEK_DAYS.map(d=>`<div class="tt-head">${d}</div>`).join('')}`;
-  PERIODS.forEach((p,pi)=>{
-    html+=`<div class="tt-period">${p}</div>`;
-    WEEK_DAYS.forEach((_,di)=>{
-      const key=`${di}_${pi}`;
-      const subKey=timetable[key];
-      const sub=subKey?SUBJ[subKey]:null;
-      const isCurrent=di===curDow&&pi===curPeriod&&curDow<5;
-      html+=`<div class="tt-cell${sub?' filled':''}${isCurrent?' current-period':''}"
-        style="${sub?`background:${sub.c}cc`:''}"
-        onclick="ttCellClick(${di},${pi},'${key}')">
-        ${sub?sub.n.split(' ')[0]:'<span style="color:var(--t3);font-size:11px">+</span>'}
+  const el=document.getElementById('ttGrid');if(\!el)return;
+  let html=`<div class="tt-cell tt-hdr"></div>${WEEK_DAYS.map(d=>`<div class="tt-cell tt-hdr">${d}</div>`).join('')}`;
+  PERIODS.forEach(p=>{
+    html+=`<div class="tt-cell tt-period">${p}</div>`;
+    WEEK_DAYS.forEach(d=>{
+      const key=`${d}_${p}`;const sk=timetable[key]||'';const s=sk?SUBJ[sk]:null;
+      html+=`<div class="tt-cell${sk?' tt-set':''}" style="${s?`border-top:2px solid ${s.c}`:''}cursor:pointer" onclick="selectTTCell('${d}','${p}')">
+        ${s?`<span style="font-size:11px;font-weight:600;color:${s.c}">${s.n}</span>`:`<span style="color:var(--t3);font-size:11px">—</span>`}
       </div>`;
     });
   });
-  grid.innerHTML=html;
-
-  // subject picker buttons
-  const btns=document.getElementById('ttSubjBtns');
-  if(btns)btns.innerHTML=`<button class="btn btn-g btn-sm" onclick="setTT(null)">Clear</button>`+
-    Object.entries(SUBJ).filter(([k])=>!['ee','tok','cas'].includes(k)).map(([k,s])=>
-      `<button class="btn btn-g btn-sm" onclick="setTT('${k}')" style="border-color:${s.c};color:${s.c}">${s.n}</button>`).join('');
+  el.innerHTML=html;
 }
-
-function ttCellClick(di,pi,key){
-  ttSelected={di,pi,key};
-  const picker=document.getElementById('ttPicker');const lbl=document.getElementById('ttCellLabel');
-  if(!picker||!lbl)return;
-  lbl.textContent=`${WEEK_DAYS[di]} ${PERIODS[pi]}`;
-  picker.style.display='block';
+function selectTTCell(day,period){
+  ttSelected={day,period};
+  const el=document.getElementById('ttPicker');if(\!el)return;
+  el.style.display='';
+  document.getElementById('ttCellLabel').textContent=`${day} ${period}`;
+  const bEl=document.getElementById('ttSubjBtns');if(\!bEl)return;
+  bEl.innerHTML=Object.entries(SUBJ).map(([k,s])=>`<button class="btn btn-g btn-sm" style="border:1px solid ${s.c};color:${s.c}" onclick="setTTSubj('${k}')">${s.n}</button>`).join('')
+    +`<button class="btn btn-g btn-sm" onclick="setTTSubj('')">Clear</button>`;
 }
-function setTT(subKey){
-  if(!ttSelected)return;
-  if(subKey)timetable[ttSelected.key]=subKey;else delete timetable[ttSelected.key];
+function setTTSubj(sk){
+  if(\!ttSelected)return;
+  const key=`${ttSelected.day}_${ttSelected.period}`;
+  if(sk)timetable[key]=sk;else delete timetable[key];
   save();renderTimetable();
+  document.getElementById('ttPicker').style.display='none';
 }
 function clearTT(){timetable={};save();renderTimetable();}
 
-// ═══ FA TRACKER ═════════════════════════
+// ═══ FA TRACKER ══════════════════════
 function addFA(){
   const month=document.getElementById('faMonth').value;
   const subj=document.getElementById('faSubjSel').value;
   const score=+document.getElementById('faScoreInp').value;
   const notes=document.getElementById('faNotesInp').value.trim();
-  if(!score&&score!==0)return;
+  if(\!month||\!subj||isNaN(score))return;
   faRecs.push({month,subject:subj,score,notes,date:todayKey()});
-  save();
-  document.getElementById('faScoreInp').value='';document.getElementById('faNotesInp').value='';
-  renderFATracker();
+  save();renderFATracker();
+  document.getElementById('faScoreInp').value='';
+  document.getElementById('faNotesInp').value='';
 }
-
 function renderFATracker(){
-  const el=document.getElementById('faTrackerTable');if(!el)return;
-  if(!faRecs.length){el.innerHTML='<div class="empty">No FA records yet. Add your first FA score above.</div>';return;}
-
-  // group by month
-  const byMonth={};
-  faRecs.forEach(r=>{
-    if(!byMonth[r.month])byMonth[r.month]=[];
-    byMonth[r.month].push(r);
-  });
-
-  const subKeys=['ma','cs','bm','sp','ch','en'];
-  let html=`<div style="overflow-x:auto">
-    <table class="fa-table">
-      <thead><tr><th>Month</th>${subKeys.map(k=>`<th style="color:${SUBJ[k].c}">${SUBJ[k].n.split(' ')[0]}</th>`).join('')}<th>Avg</th></tr></thead>
-      <tbody>`;
-
-  MONTHS.forEach(m=>{
-    const recs=byMonth[m];if(!recs)return;
-    const scores={};recs.forEach(r=>{scores[r.subject]=r.score;});
-    const vals=subKeys.map(k=>scores[k]);
-    const filled=vals.filter(v=>v!==undefined);
-    const avg=filled.length?Math.round(filled.reduce((a,b)=>a+b,0)/filled.length):null;
-    html+=`<tr><td style="font-weight:600">${m}</td>`;
-    subKeys.forEach(k=>{
-      const v=scores[k];
-      if(v===undefined){html+=`<td><span class="sc-na">—</span></td>`;return;}
-      const cls=v>=70?'sc-hi':v>=50?'sc-mid':'sc-lo';
-      html+=`<td><span class="score-chip ${cls}">${v}</span>${recs.find(r=>r.subject===k)?.notes?`<div style="font-size:10px;color:var(--t3);margin-top:2px">${esc(recs.find(r=>r.subject===k).notes)}</div>`:''}</td>`;
-    });
-    const avgCls=avg!==null?(avg>=70?'sc-hi':avg>=50?'sc-mid':'sc-lo'):'';
-    html+=`<td>${avg!==null?`<span class="score-chip ${avgCls}">${avg}</span>`:'<span class="sc-na">—</span>'}</td></tr>`;
-  });
-
-  // averages row
-  html+=`<tr style="border-top:2px solid var(--b1)"><td style="font-weight:700;color:var(--t2)">Avg</td>`;
-  subKeys.forEach(k=>{
-    const all=faRecs.filter(r=>r.subject===k).map(r=>r.score);
-    if(!all.length){html+=`<td><span class="sc-na">—</span></td>`;return;}
-    const avg=Math.round(all.reduce((a,b)=>a+b,0)/all.length);
-    const cls=avg>=70?'sc-hi':avg>=50?'sc-mid':'sc-lo';
-    html+=`<td><span class="score-chip ${cls}">${avg}</span></td>`;
-  });
-  html+=`<td></td></tr></tbody></table></div>`;
-  el.innerHTML=html;
-}
-
-// ═══ SUBJECTS ═══════════════════════════
-function renderSubjects(){
-  const el=document.getElementById('subjCards');if(!el)return;
-  el.innerHTML=Object.entries(SUBJ).filter(([k])=>!['ee','tok','cas'].includes(k)).map(([k,s])=>`
-    <div class="card scard">
-      <div class="stripe" style="background:${s.c}"></div>
-      <div class="slvl" style="background:${s.c}18;color:${s.c}">${s.lv}</div>
-      <div class="sname">${s.n}</div>
-      <div class="smeta"><span>${s.t}</span><span class="sia" style="background:${s.c}18;color:${s.c}">${s.ia}</span></div>
-      <div style="margin-top:10px;font-size:12px;color:var(--t3)">
-        Tasks: ${tasks.filter(t=>t.subject===k&&!t.done).length} active · FA: ${tasks.filter(t=>t.subject===k&&t.type==='fa'&&!t.done).length}
-      </div>
-    </div>`).join('');
-}
-
-// ═══ IB CORE ════════════════════════════
-function renderIBCore(){
-  const el=document.getElementById('ibcoreContent');if(!el)return;
-  el.innerHTML=`
-    <div class="card" style="margin-bottom:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <span style="font-size:16px;font-weight:600">📄 Extended Essay</span>
-        <span style="font-size:11px;font-weight:700;padding:2px 9px;border-radius:4px;background:rgba(99,102,241,.12);color:#818cf8">MAX 4,000 WORDS</span>
-      </div>
-      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px">
-        <div><div style="font-size:11px;color:var(--t3);margin-bottom:4px">Words written</div>
-          <input type="number" class="ginp" style="width:110px" value="${core.eeW}" oninput="core.eeW=+this.value||0;save();renderAll()"/></div>
-      </div>
-      <div class="pl"><span>Progress</span><span>${core.eeW.toLocaleString()} / 4,000</span></div>
-      <div class="pb"><div class="pf" style="width:${Math.min(core.eeW/4000*100,100)}%;background:#6366f1"></div></div>
-    </div>
-    <div class="cgrid c2">
-      <div class="card">
-        <div style="font-size:16px;font-weight:600;margin-bottom:14px">🧠 Theory of Knowledge</div>
-        <div style="margin-bottom:12px"><div style="font-size:11px;color:var(--t3);margin-bottom:4px">Essay words</div>
-          <input type="number" class="ginp" style="width:100px" value="${core.tokW}" oninput="core.tokW=+this.value||0;save();renderAll()"/></div>
-        <div class="pl"><span>Essay</span><span>${core.tokW} / 1,600</span></div>
-        <div class="pb" style="margin-bottom:12px"><div class="pf" style="width:${Math.min(core.tokW/1600*100,100)}%;background:#14b8a6"></div></div>
-        <div style="font-size:11px;color:var(--t3);margin-bottom:6px">Exhibition objects</div>
-        <input type="range" min="0" max="3" value="${core.tokO}" oninput="core.tokO=+this.value;save();renderAll()" style="width:100%"/>
-        <div style="font-size:12px;color:var(--t2);margin-top:4px">${core.tokO} / 3 chosen</div>
-      </div>
-      <div class="card">
-        <div style="font-size:16px;font-weight:600;margin-bottom:14px">🎯 CAS Hours</div>
-        ${[['casC','🎨 Creativity'],['casA','🏃 Activity'],['casS','🤝 Service']].map(([k,l])=>`
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <span style="font-size:12px;color:var(--t2);width:110px">${l}</span>
-            <input type="number" class="ginp" style="width:65px" value="${core[k]}" min="0" oninput="core['${k}']=+this.value||0;save();renderAll()"/>
-            <span style="font-size:11px;color:var(--t3)">/ 50</span>
-          </div>
-          <div class="pb" style="margin-bottom:8px"><div class="pf" style="width:${Math.min(core[k]/50*100,100)}%;background:#eab308"></div></div>`).join('')}
-      </div>
+  const el=document.getElementById('faTrackerTable');if(\!el)return;
+  if(\!faRecs.length){el.innerHTML='<div class="empty">No FA records yet — add your first score above</div>';return;}
+  const grouped={};
+  faRecs.forEach(r=>{if(\!grouped[r.subject])grouped[r.subject]=[];grouped[r.subject].push(r);});
+  el.innerHTML=Object.entries(grouped).map(([k,recs])=>{
+    const s=SUBJ[k]||{n:k,c:'#888'};
+    const avg=Math.round(recs.reduce((a,r)=>a+r.score,0)/recs.length);
+    return`<div style="margin-bottom:18px">
+      <div style="font-size:13px;font-weight:700;color:${s.c};margin-bottom:8px">${s.n} — avg ${avg}%</div>
+      <table style="width:100%;font-size:12.5px;border-collapse:collapse">
+        <thead><tr style="color:var(--t3)">${['Month','Score','Notes','Date'].map(h=>`<th style="text-align:left;padding:4px 8px;border-bottom:1px solid var(--b1)">${h}</th>`).join('')}</tr></thead>
+        <tbody>${recs.map(r=>`<tr style="border-bottom:1px solid var(--b1)">
+          <td style="padding:6px 8px">${r.month}</td>
+          <td style="padding:6px 8px;font-weight:700;color:${r.score>=70?'var(--grn)':r.score>=50?'var(--amb)':'var(--red)'}">${r.score}%</td>
+          <td style="padding:6px 8px;color:var(--t2)">${r.notes||'—'}</td>
+          <td style="padding:6px 8px;color:var(--t3)">${r.date||'—'}</td>
+        </tr>`).join('')}</tbody>
+      </table>
     </div>`;
+  }).join('');
 }
 
-// ═══ GRADES ═════════════════════════════
-function renderGrades(){
-  const el=document.getElementById('gradeRows');if(!el)return;
-  el.innerHTML=[['ma','Maths AI HL'],['cs','CS HL'],['bm','Business HL'],['sp','Spanish'],['ch','Chemistry SL'],['en','English SL']].map(([k,n])=>`
-    <div class="grow">
-      <div class="gsub"><div class="tdot" style="background:${SUBJ[k].c}"></div>${n}</div>
-      <input type="number" class="ginp" min="1" max="7" placeholder="—" value="${grades[k]||''}" oninput="grades['${k}']=+this.value||0;save();calcGrades()"/>
-      <span style="font-size:12px;color:var(--t3)">/7</span>
-    </div>`).join('');
-  calcGrades();
-}
-function calcGrades(){
-  const total=Object.values(grades).reduce((s,v)=>s+(+v||0),0);
-  const ei='ABCDE'.indexOf(document.getElementById('eeG')?.value||'');
-  const ti='ABCDE'.indexOf(document.getElementById('tokG')?.value||'');
-  const bonus=ei>=0&&ti>=0?BONUS[ei][ti]:0;
-  const grand=total+bonus;
-  const bp=document.getElementById('bonusPts');if(bp)bp.textContent='+'+bonus;
-  const tg=document.getElementById('totalGrade');if(tg)tg.textContent=grand||'—';
-  const gb=document.getElementById('gradeBand');
-  if(gb&&grand){if(grand>=40){gb.textContent='Exceptional — top candidate';gb.style.color='var(--grn)';}else if(grand>=35){gb.textContent='Strong — diploma awarded';gb.style.color='var(--grn)';}else if(grand>=28){gb.textContent='Above threshold — diploma likely';gb.style.color='var(--amb)';}else if(grand>=24){gb.textContent='Minimum — 24 pts required for diploma';gb.style.color='var(--amb)';}else{gb.textContent='Below diploma requirement';gb.style.color='var(--red)';}}
-}
-
-// ═══ COUNTDOWN ══════════════════════════
-let cdTimer=null;
-function saveExam(){examStr=document.getElementById('examDate')?.value||'';localStorage.setItem('ib_exam',examStr);}
-function startCdTick(){if(cdTimer)clearInterval(cdTimer);renderCd();if(examStr)cdTimer=setInterval(renderCd,1000);}
-function renderCd(){
-  const el=document.getElementById('cdDisp');if(!el)return;
-  const inp=document.getElementById('examDate');if(inp&&examStr&&!inp.value)inp.value=examStr;
-  if(!examStr){el.innerHTML='<div class="empty">Set your exam date above</div>';return;}
-  const diff=new Date(examStr)-new Date();
-  if(diff<=0){el.innerHTML='<div style="font-size:18px;font-weight:600;color:var(--grn)">Exams underway. You\'ve prepared for this.</div>';return;}
-  const dy=Math.floor(diff/864e5),hr=Math.floor(diff%864e5/36e5),mn=Math.floor(diff%36e5/6e4),sc=Math.floor(diff%6e4/1e3);
-  el.innerHTML=`<div class="cdgrid">
-    <div class="cdbox"><div class="cdnum">${dy}</div><div class="cdunit">Days</div></div>
-    <div class="cdbox"><div class="cdnum">${hr}</div><div class="cdunit">Hours</div></div>
-    <div class="cdbox"><div class="cdnum">${mn}</div><div class="cdunit">Min</div></div>
-    <div class="cdbox"><div class="cdnum">${sc}</div><div class="cdunit">Sec</div></div>
-  </div>
-  <div style="margin-top:14px;font-size:13px;color:var(--t2)">${new Date(examStr).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>`;
-}
-
-// ═══ TIMER ══════════════════════════════
-let tRun=false,tIv=null,tTotal=25*60,tLeft=25*60,tLabel='Focus';
-function setPreset(m,lbl){tTotal=m*60;tLeft=m*60;tLabel=lbl;if(tRun){clearInterval(tIv);tRun=false;}updateTDisp();document.getElementById('tBtn').textContent='Start';document.getElementById('tPhase').textContent=lbl;}
-function updateTDisp(){
-  const m=Math.floor(tLeft/60),s=tLeft%60;
-  document.getElementById('tDisp').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  const off=628.32*(1-tLeft/tTotal);
-  document.getElementById('tRing').style.strokeDashoffset=628.32-off;
-}
-function toggleTimer(){
-  if(tRun){clearInterval(tIv);tRun=false;document.getElementById('tBtn').textContent='Resume';}
-  else{
-    tRun=true;document.getElementById('tBtn').textContent='Pause';
-    tIv=setInterval(()=>{
-      if(tLeft<=0){
-        clearInterval(tIv);tRun=false;document.getElementById('tBtn').textContent='Start';
-        tSess++;tMin+=Math.round(tTotal/60);
-        // log to study chart
-        const k=todayKey();studyLog[k]=(studyLog[k]||0)+Math.round(tTotal/60);
-        localStorage.setItem('ib_tsess',tSess);localStorage.setItem('ib_tmin',tMin);
-        save();renderTimerStats();renderAll();
-        if('Notification'in window&&Notification.permission==='granted')new Notification('Orbis',{body:tLabel+' complete — take a break!'});
-        // auto-load 5-min break after a focus session
-        if(tLabel==='Focus'||tLabel==='Deep work'){setTimeout(()=>setPreset(5,'Break'),800);}
-        return;
-      }
-      tLeft--;updateTDisp();
-    },1000);
-  }
-}
-function resetTimer(){clearInterval(tIv);tRun=false;tLeft=tTotal;updateTDisp();document.getElementById('tBtn').textContent='Start';}
-function renderTimerStats(){
-  const el=document.getElementById('tStats');if(!el)return;
-  el.innerHTML=`<div style="display:flex;justify-content:space-around">${[['Sessions',tSess],['Minutes',tMin],['Hours',(tMin/60).toFixed(1)]].map(([l,v])=>`<div style="text-align:center"><div style="font-family:var(--mono);font-size:20px;font-weight:600">${v}</div><div style="font-size:11px;color:var(--t3);margin-top:2px">${l}</div></div>`).join('')}</div>`;
-}
-
-// ═══ NOTES ══════════════════════════════
+// ═══ NOTES ═══════════════════════════
 function saveNotes(){
-  const q=document.getElementById('qNote'),m=document.getElementById('mainNote');
-  if(q)notes.q=q.value;if(m)notes.m=m.value;save();
+  const q=document.getElementById('qNote');if(q)notes.q=q.value;
+  const m=document.getElementById('mainNote');if(m)notes.m=m.value;
+  save();
 }
 
-// ═══ TODAY PANEL ════════════════════════
-function renderTodayPanel(){
-  const el=document.getElementById('todayPanel');if(!el)return;
-  const now=new Date();
-  const dow=(now.getDay()+6)%7; // Mon=0 … Sun=6
-  const isWeekend=dow>=5;
-  const periodHours=[8,9,10,11,13,14,15];
-  const h=now.getHours();
-  const curPeriod=periodHours.findIndex((ph,i)=>
-    h===ph||(i<periodHours.length-1&&h>ph&&h<periodHours[i+1])
-  );
-  let schedHTML='';
-  if(isWeekend){
-    schedHTML='<div class="empty" style="padding:14px;font-size:12px">Weekend — no school 🎉</div>';
-  } else {
-    schedHTML=PERIODS.map((p,pi)=>{
-      const subKey=timetable[`${dow}_${pi}`];
-      const sub=subKey?SUBJ[subKey]:null;
-      const isNow=pi===curPeriod;
-      return`<div class="tsched-row${isNow?' now':''}">
-        <span class="tsched-per">${p}</span>
-        ${sub
-          ?`<span style="width:7px;height:7px;border-radius:50%;background:${sub.c};flex-shrink:0"></span>
-             <span class="tsched-name">${sub.n}</span>`
-          :`<span style="color:var(--t3);font-size:11.5px">Free</span>`}
-        ${isNow?`<span style="margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.05em;color:var(--acc)">NOW</span>`:''}
-      </div>`;
-    }).join('');
+// ═══ OBSIDIAN FETCH ══════════════════
+async function fetchObsidianTasks(){
+  try{
+    const r=await fetch('data/tasks.json?t='+Date.now());
+    if(\!r.ok)throw new Error('fetch failed');
+    const data=await r.json();
+    const obs=data.tasks||[];
+    // Merge: keep local tasks, replace obsidian ones
+    const local=tasks.filter(t=>t.source\!=='obsidian');
+    tasks=[...obs,...local];
+    // update sync indicator
+    const ind=document.getElementById('obsidianInd');
+    if(ind){ind.title=`Synced ${obs.length} tasks from Obsidian · ${new Date(data.generated).toLocaleTimeString()}`;ind.style.background='var(--grn)';}
+    renderAll();
+  }catch(e){
+    console.warn('Could not load tasks.json',e);
+    const ind=document.getElementById('obsidianInd');
+    if(ind){ind.title='Sync error — check console';ind.style.background='var(--red)';}
+    renderAll();
   }
-  const tok=todayKey();
-  const tom=new Date(now);tom.setDate(tom.getDate()+1);
-  const tomKey=tom.toISOString().slice(0,10);
-  const dueTasks=tasks.filter(t=>!t.done&&(t.due===tok||t.due===tomKey))
-    .sort((a,b)=>new Date(a.due)-new Date(b.due));
-  el.innerHTML=`
-    <div>
-      <div class="slabel">${isWeekend?'Weekend':'Today — '+WEEK_DAYS[dow]}</div>
-      <div class="card" style="padding:10px 12px"><div class="today-sched">${schedHTML}</div></div>
-    </div>
-    <div>
-      <div class="slabel">Due today &amp; tomorrow</div>
-      ${dueTasks.length
-        ?dueTasks.map(t=>taskHTML(t,tasks.indexOf(t))).join('')
-        :'<div class="card"><div class="empty">Nothing due in the next 2 days 🎉</div></div>'}
-    </div>`;
 }
 
-// ═══ TASK FILTER ════════════════════════
-function setTaskFilter(val){
-  taskFilter=val;
-  document.querySelectorAll('.ftag').forEach(b=>b.classList.remove('active'));
-  document.querySelector(`.ftag[data-f="${val}"]`)?.classList.add('active');
-  renderTaskLists();
-}
-function onTaskSearch(){
-  taskSearch=(document.getElementById('taskSearch')?.value||'').toLowerCase();
-  renderTaskLists();
-}
-
-// ═══ CALENDAR EXPORT ════════════════════
-function gcalLink(t){
-  const d=t.due.replace(/-/g,'');
-  const d2=new Date(t.due);d2.setDate(d2.getDate()+1);
-  const d2s=d2.toISOString().slice(0,10).replace(/-/g,'');
-  const nm=encodeURIComponent(t.name);
-  const det=encodeURIComponent(`Subject: ${SUBJ[t.subject]?.n||t.subject} · Type: ${ATYPE[t.type]?.l||t.type} · via Orbis`);
-  return`<a class="gcal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${nm}&dates=${d}/${d2s}&details=${det}" target="_blank" title="Add to Google Calendar" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></a>`;
-}
-function exportICS(){
-  const active=tasks.filter(t=>!t.done&&t.due);
-  if(!active.length){alert('No tasks with due dates to export.');return;}
-  let ics=`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Orbis//IB Hub//EN\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:Orbis Tasks\r\n`;
-  active.forEach(t=>{
-    const d=t.due.replace(/-/g,'');
-    const d2=new Date(t.due);d2.setDate(d2.getDate()+1);
-    const d2s=d2.toISOString().slice(0,10).replace(/-/g,'');
-    ics+=`BEGIN:VEVENT\r\nUID:orbis-${d}-${Math.random().toString(36).slice(2)}\r\nSUMMARY:${t.name}\r\nDTSTART;VALUE=DATE:${d}\r\nDTEND;VALUE=DATE:${d2s}\r\nDESCRIPTION:Subject: ${SUBJ[t.subject]?.n||t.subject} · Type: ${ATYPE[t.type]?.l||t.type}\r\nEND:VEVENT\r\n`;
-  });
-  ics+=`END:VCALENDAR`;
-  const blob=new Blob([ics],{type:'text/calendar'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='orbis-tasks.ics';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-}
-
-// ═══ PWA ════════════════════════════════
-if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
-if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
-
-// ═══ INIT ═══════════════════════════════
-updateTDisp();renderAll();
+// ═══ BOOT ════════════════════════════
+document.getElementById('newTask')?.addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
+// set countdown date default
+const examInp=document.getElementById('examDate');
+if(examInp&&\!examInp.value){examInp.value=examStr||'2026-05-21';}
+tSec=tLen;updateRing();
+fetchObsidianTasks();
 </script>
 </body>
 </html>

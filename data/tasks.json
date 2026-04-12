@@ -1,0 +1,501 @@
+{
+  "generated": "2026-04-12T13:10:05.208786",
+  "vault": "/sessions/beautiful-loving-feynman/mnt/School mangement/IB Vault",
+  "tasks": [
+    {
+      "id": "obs-assignment-tracker-1",
+      "name": "FA_3_Ismat_Chugtai",
+      "subject": "en",
+      "type": "fa",
+      "due": "2026-04-24",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-2",
+      "name": "WT_3",
+      "subject": "en",
+      "type": "fa",
+      "due": "2026-04-18",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-3",
+      "name": "FA_3-T2_7Ps",
+      "subject": "bm",
+      "type": "fa",
+      "due": "2026-04-21",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-4",
+      "name": "FA_2_WRITING   [awaiting_score]",
+      "subject": "sp",
+      "type": "fa",
+      "due": "2026-03-26",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-5",
+      "name": "Combustion-P1B   [awaiting_score]",
+      "subject": "ch",
+      "type": "fa",
+      "due": "2026-03-16",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-6",
+      "name": "IA Criterion A   [awaiting_score]",
+      "subject": "cs",
+      "type": "fa",
+      "due": "2026-03-13",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-7",
+      "name": "IA Planning doc   [awaiting_score]",
+      "subject": "ch",
+      "type": "fa",
+      "due": "2026-03-05",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-8",
+      "name": "FA_2",
+      "subject": "cs",
+      "type": "fa",
+      "due": null,
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-9",
+      "name": "FA_6_Probability Distribution",
+      "subject": "maths",
+      "type": "fa",
+      "due": null,
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-10",
+      "name": "STEAM_3_Differentiation",
+      "subject": "maths",
+      "type": "steam",
+      "due": "2026-04-19",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-11",
+      "name": "STEAM_TIH   [awaiting_score]",
+      "subject": "en",
+      "type": "steam",
+      "due": "2026-03-31",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-12",
+      "name": "STEAM_3CT2   [awaiting_score]",
+      "subject": "ch",
+      "type": "steam",
+      "due": "2026-03-23",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-13",
+      "name": "Add upcoming STEAM tasks here",
+      "subject": "hw",
+      "type": "steam",
+      "due": null,
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-14",
+      "name": "WT_2T2   [awaiting_score]",
+      "subject": "sp",
+      "type": "wt",
+      "due": "2026-03-13",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-15",
+      "name": "WT_2",
+      "subject": "en",
+      "type": "wt",
+      "due": null,
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-16",
+      "name": "Add WT tasks here",
+      "subject": "hw",
+      "type": "wt",
+      "due": null,
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-17",
+      "name": "Rate_of_reaction",
+      "subject": "ch",
+      "type": "sdl",
+      "due": "2026-04-13",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-18",
+      "name": "SDL_Chugtai",
+      "subject": "en",
+      "type": "sdl",
+      "due": "2026-04-09",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-19",
+      "name": "L1-SDL1-Structural formula of organic compounds   [awaiting_score]",
+      "subject": "ch",
+      "type": "sdl",
+      "due": "2026-02-02",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-20",
+      "name": "SDL_3_Rules of differentiation",
+      "subject": "maths",
+      "type": "sdl",
+      "due": null,
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-21",
+      "name": "SDL_1T2",
+      "subject": "sp",
+      "type": "sdl",
+      "due": null,
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-22",
+      "name": "SDL_3_T2_Pricing_C6a",
+      "subject": "bm",
+      "type": "sdl",
+      "due": null,
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-23",
+      "name": "SDL 2 ML",
+      "subject": "cs",
+      "type": "sdl",
+      "due": null,
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-24",
+      "name": "Add SDL tasks here",
+      "subject": "hw",
+      "type": "sdl",
+      "due": null,
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-25",
+      "name": "CS IA Criterion B Final Draft  [IA]",
+      "subject": "cs",
+      "type": "sdl",
+      "due": "2026-04-24",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-26",
+      "name": "Final TOK Exhibition",
+      "subject": "tok",
+      "type": "sdl",
+      "due": "2026-04-28",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-27",
+      "name": "TOK Final Exhibition Write-up",
+      "subject": "tok",
+      "type": "sdl",
+      "due": "2026-04-30",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-28",
+      "name": "CS IA Criterion C Final Draft  [IA]",
+      "subject": "cs",
+      "type": "sdl",
+      "due": "2026-08-07",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-29",
+      "name": "CS IA Criterion D Final Draft  [IA]",
+      "subject": "cs",
+      "type": "sdl",
+      "due": "2026-08-31",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-30",
+      "name": "BM IA Final Submission  [IA]",
+      "subject": "bm",
+      "type": "sdl",
+      "due": "2026-09-29",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-31",
+      "name": "EE Final Data Collection",
+      "subject": "ee",
+      "type": "sdl",
+      "due": "2026-09-30",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-32",
+      "name": "Chemistry IA Final Submission  [IA]",
+      "subject": "ch",
+      "type": "sdl",
+      "due": "2026-09-30",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-33",
+      "name": "CS IA Criterion E Final Draft  [IA]",
+      "subject": "cs",
+      "type": "sdl",
+      "due": "2026-10-02",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-34",
+      "name": "CS IA Final Submission  [IA]",
+      "subject": "cs",
+      "type": "sdl",
+      "due": "2026-10-12",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-35",
+      "name": "TOK Essay Draft 1",
+      "subject": "tok",
+      "type": "sdl",
+      "due": "2026-10-19",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-36",
+      "name": "EE Final Submission",
+      "subject": "ee",
+      "type": "sdl",
+      "due": "2026-10-28",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-37",
+      "name": "TOK Essay Draft 2",
+      "subject": "tok",
+      "type": "sdl",
+      "due": "2026-10-29",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-38",
+      "name": "Maths IA Final Submission  [IA]",
+      "subject": "maths",
+      "type": "sdl",
+      "due": "2026-10-30",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-39",
+      "name": "EE Viva and Final Reflection",
+      "subject": "ee",
+      "type": "sdl",
+      "due": "2026-11-12",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-40",
+      "name": "TOK Final Essay Submission",
+      "subject": "tok",
+      "type": "sdl",
+      "due": "2026-11-16",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-41",
+      "name": "Add IA/EE/TOK tasks here",
+      "subject": "ee",
+      "type": "sdl",
+      "due": null,
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-42",
+      "name": "Maths AI HL Paper 1  [EXAM]",
+      "subject": "maths",
+      "type": "sdl",
+      "due": "2026-05-21",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-43",
+      "name": "Maths AI HL Paper 2  [EXAM]",
+      "subject": "maths",
+      "type": "sdl",
+      "due": "2026-05-21",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-44",
+      "name": "Maths AI HL Paper 3  [EXAM]",
+      "subject": "maths",
+      "type": "sdl",
+      "due": "2026-05-22",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-45",
+      "name": "Business Management HL Paper 1  [EXAM]",
+      "subject": "bm",
+      "type": "sdl",
+      "due": "2026-05-25",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-46",
+      "name": "Business Management HL Paper 2  [EXAM]",
+      "subject": "bm",
+      "type": "sdl",
+      "due": "2026-05-25",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-47",
+      "name": "English A Lang Lit SL Paper 1  [EXAM]",
+      "subject": "en",
+      "type": "sdl",
+      "due": "2026-06-01",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-48",
+      "name": "English A Lang Lit SL Paper 2  [EXAM]",
+      "subject": "en",
+      "type": "sdl",
+      "due": "2026-06-01",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-49",
+      "name": "Computer Science HL Paper 1  [EXAM]",
+      "subject": "cs",
+      "type": "sdl",
+      "due": "2026-06-03",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-50",
+      "name": "Computer Science HL Paper 2  [EXAM]",
+      "subject": "cs",
+      "type": "sdl",
+      "due": "2026-06-03",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-51",
+      "name": "Chemistry SL Paper 1  [EXAM]",
+      "subject": "ch",
+      "type": "sdl",
+      "due": "2026-06-04",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-52",
+      "name": "Chemistry SL Paper 2  [EXAM]",
+      "subject": "ch",
+      "type": "sdl",
+      "due": "2026-06-04",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-53",
+      "name": "Spanish Ab Initio Paper 2 Listening  [EXAM]",
+      "subject": "sp",
+      "type": "sdl",
+      "due": "2026-06-05",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-54",
+      "name": "Spanish Ab Initio Paper 2 Reading  [EXAM]",
+      "subject": "sp",
+      "type": "sdl",
+      "due": "2026-06-05",
+      "done": false,
+      "source": "obsidian"
+    },
+    {
+      "id": "obs-assignment-tracker-55",
+      "name": "Spanish Ab Initio Paper 1 Writing  [EXAM]",
+      "subject": "sp",
+      "type": "sdl",
+      "due": "2026-06-05",
+      "done": false,
+      "source": "obsidian"
+    }
+  ]
+}

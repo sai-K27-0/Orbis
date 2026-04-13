@@ -1,5 +1,5 @@
 // Orbis Service Worker — enables offline access
-const CACHE = 'orbis-v3';
+const CACHE = 'orbis-v5';
 const ASSETS = ['/', '/index.html'];
 
 self.addEventListener('install', e => {
@@ -10,6 +10,7 @@ self.addEventListener('install', e => {
 });
 
 self.addEventListener('activate', e => {
+  // Delete ALL old caches when version changes
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
@@ -19,7 +20,13 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
-  );
+  // Always fetch fresh for HTML and JSON — only cache static assets
+  const url = new URL(e.request.url);
+  if (url.pathname.endsWith('.html') || url.pathname.endsWith('.json') || url.pathname === '/') {
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+  } else {
+    e.respondWith(
+      caches.match(e.request).then(cached => cached || fetch(e.request))
+    );
+  }
 });

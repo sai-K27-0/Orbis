@@ -10,7 +10,7 @@ Planned milestones for Orbis, in order of priority.
 - [x] Obsidian vault as source of truth for tasks
 - [x] `sync-tasks.bat` to push Obsidian data → `tasks.json` → dashboard
 - [x] Project memory files (CLAUDE.md, CHANGELOG.md, ROADMAP.md)
-- [ ] Move Obsidian vault into OneDrive folder (school account)
+- [x] Move Obsidian vault into OneDrive folder (school account)
 - [ ] Import OneNote notebooks into Notion
 
 ## Phase 2 — Notion Setup

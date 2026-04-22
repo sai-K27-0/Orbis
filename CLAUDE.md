@@ -13,7 +13,10 @@ IB Core progress, grades, and study time. It is accessible from any device
 via browser and is installable as a home screen app (PWA).
 
 The project is evolving into a full **unified knowledge management system**
-combining Obsidian, Notion, and OneDrive — described in the plan below.
+combining Obsidian, Notion, and OneDrive.
+
+The Netlify site (orbis.sam0sa.me) has been taken down. The PWA dashboard
+still exists in the repo but is no longer publicly hosted.
 
 ---
 
@@ -47,46 +50,46 @@ combining Obsidian, Notion, and OneDrive — described in the plan below.
 
 ```
 Orbis/
-├── index.html          # Main PWA dashboard (single-file app)
+├── index.html          # PWA dashboard (offline, no longer hosted)
 ├── manifest.json       # PWA manifest
-├── sw.js               # Service worker (offline cache)
+├── sw.js               # Service worker
 ├── data/
-│   └── tasks.json      # Task data exported from Obsidian vault
+│   └── tasks.json      # 55 tasks exported from Obsidian vault
 ├── sync-tasks.bat      # Windows script: Obsidian → tasks.json
 ├── push-to-github.bat  # Windows script: push to GitHub
 ├── CLAUDE.md           # This file — project memory for Claude
 ├── CHANGELOG.md        # Version history
 ├── ROADMAP.md          # Future plans
-└── README.md           # Public project description
+└── README.md           # Project description
 ```
 
 ---
 
-## Knowledge Management Plan
+## Knowledge Management System
 
-Sai is building a unified study knowledge base using three tools:
+Three tools, each with a clear role:
 
 ### 1. Obsidian (thinking + writing layer)
-- Stored in OneDrive (school Microsoft account) for free cloud sync
-- Used for deep notes, ideas, atomic concepts, IB assignments
-- Metadata/frontmatter on every note for Dataview queries
-- Claude plugin (Obsidian Copilot or Smart Second Brain) for AI analysis
-- **Source of truth for task data** — exported to `data/tasks.json` via `sync-tasks.bat`
+- Vault stored in OneDrive (school Microsoft account) — already done
+- Deep notes, ideas, atomic concepts, IB assignments
+- Frontmatter metadata on every note for Dataview queries
+- Obsidian Copilot / Smart Second Brain plugin for Claude AI analysis
+- Source of truth for task data → exported to `data/tasks.json`
 
 ### 2. Notion (structured data + dashboard layer)
-- Free tier is sufficient for solo use
-- Used for: course databases, book/source tracking, progress dashboards, structured records
-- OneNote content imported via Notion's built-in OneNote importer
-- Notion API token needed to allow Claude to create/manage structure programmatically
+- Free tier — no subscription needed
+- Subjects database, Tasks database, IB Core tracker, Sources database
+- OneNote content to be imported into Notion (archive)
+- Claude manages Notion via the API
 
 ### 3. OneDrive (cloud storage)
 - School Microsoft Student account — free
-- Stores Obsidian vault folder (auto-syncs to all devices)
-- OneNote already syncs here natively
+- Stores Obsidian vault — already set up
+- OneNote syncs here natively
 
 ### Data flow
 ```
-Obsidian vault (OneDrive) → sync-tasks.bat → data/tasks.json → index.html (PWA)
+Obsidian vault (OneDrive) → sync-tasks.bat → data/tasks.json → PWA dashboard
 Obsidian vault            → Claude plugin  → AI analysis
 Notion                    → Notion API     → Claude management
 OneNote                   → import         → Notion (archive)
@@ -94,26 +97,23 @@ OneNote                   → import         → Notion (archive)
 
 ---
 
-## Notion API Integration (planned)
+## Notion API
 
-To let Claude manage Notion (create databases, tables, pages, tags):
-1. Sai generates a Notion API token at notion.so/my-integrations
-2. Token is stored as environment variable `NOTION_TOKEN`
-3. Claude uses the token via Python/Node scripts to:
-   - Create subject databases with properties (status, type, due date)
-   - Add pages for tasks, notes, sources
-   - Build dashboards and filtered views
-   - Sync Obsidian content into Notion pages
+- Integration name: `orbis`
+- Workspace: `Sai Krithic A's Space`
+- Workspace ID: `42e483ac-69ec-8180-a074-0003730ae384`
+- Bot user ID: `34a483ac-69ec-81f6-99e1-0027ec2cafe3`
+- Token: stored separately — ask Sai to provide it
 
----
-
-## Obsidian → Notion Sync (planned)
-
-A script (Python or Node.js) that:
-- Watches the Obsidian vault folder on OneDrive
-- Reads frontmatter metadata from `.md` files
-- Pushes new/updated notes to Notion as pages
-- Runs as a scheduled task on Windows (Task Scheduler) or manually
+### What still needs to be done in Notion:
+1. Sai creates a blank page called `Orbis` in Notion manually
+2. Connects the `orbis` integration to that page (... → Add connections → Orbis)
+3. Pastes the page URL here so Claude can extract the page ID
+4. Claude then builds all databases inside that page:
+   - Subjects database
+   - Tasks database (linked to `data/tasks.json` structure)
+   - IB Core tracker (EE, TOK, CAS)
+   - Sources/Books database
 
 ---
 
@@ -131,18 +131,19 @@ Push with: `git push -u origin claude/setup-obsidian-database-Laj1E`
 ## Session Checklist (start of every new session)
 
 1. Read this file (`CLAUDE.md`)
-2. Check current branch: `git branch --show-current`
-3. Check recent commits: `git log --oneline -5`
-4. Read `ROADMAP.md` to see what's next
-5. Ask Sai what to work on today if not told
+2. Read `ROADMAP.md` to see current phase
+3. Check branch: `git branch --show-current`
+4. Check recent commits: `git log --oneline -5`
+5. Ask Sai what to work on if not told
 
 ---
 
 ## Key Decisions Made
 
-- Obsidian vault lives in OneDrive (not Obsidian Sync — free via school account)
+- Obsidian vault lives in OneDrive (not Obsidian Sync — free via school account) ✓
 - Notion free tier is enough — no subscription needed
-- OneNote will be migrated to Notion and kept as archive only
-- Web dashboard (`index.html`) stays as the live task/exam view
-- `data/tasks.json` is the bridge between Obsidian and the web dashboard
+- OneNote migrates to Notion → kept as archive only
+- Netlify site (orbis.sam0sa.me) deleted ✓
+- PWA dashboard stays in repo but not publicly hosted
+- `data/tasks.json` is the bridge between Obsidian and the dashboard
 - No over-engineering — scripts stay simple, no frameworks unless needed

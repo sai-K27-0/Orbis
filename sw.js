@@ -1,6 +1,6 @@
 // Orbis Service Worker — enables offline access
-const CACHE = 'orbis-v5';
-const ASSETS = ['/', '/index.html'];
+const CACHE = 'orbis-v6';
+const ASSETS = ['./', './index.html', './data/tasks.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(

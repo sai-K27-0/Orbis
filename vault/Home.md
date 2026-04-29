@@ -8,12 +8,12 @@
 
 | Subject | Level | IA | Grade Target |
 |---|---|---|---|
-| [[Maths AI HL]] | HL | Mathematical Investigation | 7 |
-| [[Computer Science HL]] | HL | Project (5-part) | 7 |
-| [[Business Management HL]] | HL | Research Project | 7 |
-| [[Spanish Ab Initio]] | Ab Initio | Individual Oral | 7 |
-| [[Chemistry SL]] | SL | Scientific Investigation | 7 |
-| [[English Lang & Lit SL]] | SL | Individual Oral | 7 |
+| [[Maths AI HL\|Maths AI HL]] | HL | Mathematical Investigation | 7 |
+| [[Computer Science HL\|Computer Science HL]] | HL | Project (5-part) | 7 |
+| [[Business Management HL\|Business Management HL]] | HL | Research Project | 7 |
+| [[Spanish Ab Initio\|Spanish Ab Initio]] | Ab Initio | Individual Oral | 7 |
+| [[Chemistry SL\|Chemistry SL]] | SL | Scientific Investigation | 7 |
+| [[English Lang & Lit SL\|English Lang & Lit SL]] | SL | Individual Oral | 7 |
 
 ---
 
@@ -21,21 +21,33 @@
 
 | Component | Status | Deadline |
 |---|---|---|
-| [[TOK Essay]] | Not Started | — |
-| [[TOK Exhibition]] | Not Started | — |
-| [[EE — Business Management]] | Not Started | — |
-| CAS | In Progress | Ongoing |
-
----
-
-## Quick Links
-
-- [[00 - Inbox/Inbox|Inbox]] — capture anything here first
-- [[04 - G11 Finals/G11 Finals Overview|G11 Finals]] — May–June 2026 exams
-- [[05 - Resources/Resources|Resources]] — past papers, textbooks
+| [[TOK Overview\|TOK Essay]] | Not Started | — |
+| [[TOK Overview\|TOK Exhibition]] | Not Started | — |
+| [[EE — Business Management\|Extended Essay]] | Not Started | — |
+| [[CAS Overview\|CAS]] | In Progress | Ongoing |
 
 ---
 
 ## G11 Finals Countdown
 
-Exams start: **21 May 2026**
+> Exams start **21 May 2026** — [[G11 Finals Overview|Full timetable →]]
+
+---
+
+## Recent Notes
+
+```dataview
+TABLE file.mtime AS "Last Edited"
+FROM ""
+WHERE file.name != "Home"
+SORT file.mtime DESC
+LIMIT 10
+```
+
+## Inbox
+
+```dataview
+LIST
+FROM "00 - Inbox"
+SORT file.ctime DESC
+```

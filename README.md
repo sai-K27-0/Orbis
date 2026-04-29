@@ -1,18 +1,16 @@
-# Orbis — IB Hub
+# Orbis — IB School Brain
 
-> A personal school management dashboard for IB Diploma students. Tracks assignments, assessments, IB Core progress, grades, and study time — accessible from any device via browser.
+> Sai Krithic A · IB Diploma Year 1 · 2025–2026
 
-## Features
+Orbis is a unified school management system built around three layers:
 
-- **Task manager** — full FA / STEAM / WT / SDL / Homework tracking with colour-coded subjects
-- **FA alerts** — Formative Assessments are always surfaced at the top
-- **IB Core tracker** — EE word count, TOK essay + exhibition, CAS hours (all three strands)
-- **Grade calculator** — predicted 1–7 per subject + EE/TOK bonus point matrix = total out of 45
-- **Study timer** — Pomodoro with circular progress ring, session + hour tracking, presets
-- **Exam countdown** — live days/hours/minutes/seconds to first exam
-- **Quick notes** — auto-saved scratchpad
-- **PWA** — installable on Android and iOS as a home screen app (works offline)
-- **Responsive** — full sidebar on desktop, bottom nav on mobile (Samsung, iPhone)
+| Layer | Tool | Purpose |
+|---|---|---|
+| **Notes / Writing** | Obsidian (`vault/`) | Class notes, IA drafts, EE, TOK journal, daily capture |
+| **Structured data** | Notion | Tasks, grades, IA tracker, G11 Finals, CAS log |
+| **Dashboard (PWA)** | `index.html` | Quick-glance view — tasks, timer, countdown, grades |
+
+---
 
 ## Subjects
 
@@ -23,42 +21,91 @@
 | Business Management | HL |
 | Spanish | Ab Initio |
 | Chemistry | SL |
-| English | SL |
-
-## Assessment types supported
-
-| Code | Name | Notes |
-|---|---|---|
-| FA | Formative Assessment | Monthly — highest priority |
-| STEAM | STEAM Group Task | Collaborative |
-| WT | Writing Task | Randomly assigned |
-| SDL | Self-Directed Learning | Randomly assigned, frequent |
-| HW | Homework | General |
-
-## Deploy
-
-**Netlify (recommended):**
-1. Go to [app.netlify.com/drop](https://app.netlify.com/drop)
-2. Drag the entire `Orbis/` folder onto the page
-3. Copy your site URL
-4. In your domain registrar, add a CNAME record: `ib` → your Netlify URL
-5. In Netlify → Domain settings, add your custom domain `ib.yourdomain.com`
-
-**GitHub Pages (this repo):**
-1. Push this repo to GitHub
-2. Go to Settings → Pages → Source: `main` branch, `/ (root)`
-3. Visit `https://yourusername.github.io/Orbis`
-
-## Install on Android
-
-1. Open the site in Chrome
-2. Tap the three-dot menu → "Add to Home screen"
-3. Orbis launches like a native app with no browser chrome
-
-## Local development
-
-No build step needed. Just open `index.html` in a browser.
+| English Lang & Lit | SL |
 
 ---
 
-*Built for IB Year — May 20XX session*
+## Repo Structure
+
+```
+Orbis/
+├── vault/                   ← Obsidian school brain
+│   ├── Home.md              ← dashboard (open this first)
+│   ├── 00 - Inbox/          ← quick capture
+│   ├── 01 - Daily Notes/    ← one note per day
+│   ├── 02 - Subjects/       ← 6 subjects with notes & templates
+│   ├── 03 - IB Core/        ← TOK, EE, CAS
+│   ├── 04 - G11 Finals/     ← revision notes + timetable
+│   ├── 05 - Resources/      ← past papers, textbooks
+│   └── Templates/           ← 7 reusable templates
+├── scripts/
+│   ├── build_notion.py      ← builds Notion workspace from scratch
+│   └── gmail_to_notion.gs   ← Gmail → Notion task automation
+├── data/
+│   ├── tasks.json           ← 55 tasks (source for Notion migration)
+│   └── g11-finals/          ← exam timetable + syllabus PDFs
+├── .github/workflows/
+│   └── deploy.yml           ← GitHub Pages auto-deploy on push to main
+├── index.html               ← PWA dashboard
+├── sw.js                    ← service worker (offline)
+├── manifest.json            ← PWA manifest
+├── ROADMAP.md
+├── CHANGELOG.md
+└── SETUP.md                 ← start here for local setup
+```
+
+---
+
+## Quick Start
+
+See **[SETUP.md](SETUP.md)** for the full step-by-step local setup guide.
+
+Short version:
+1. Clone repo → copy `vault/` into Obsidian → install 3 plugins
+2. Set `NOTION_API_TOKEN` env var → run `scripts/build_notion.py` (already done)
+3. Deploy `gmail_to_notion.gs` to Google Apps Script → run `setup()` + `createTimeTrigger()`
+
+---
+
+## Obsidian Plugins (required)
+
+Install via Obsidian → Settings → Community plugins:
+
+| Plugin | Purpose |
+|---|---|
+| **Dataview** | Live queries on Home dashboard |
+| **Calendar** | Visual daily notes sidebar |
+| **Spaced Repetition** | Flashcard review for exam revision |
+
+---
+
+## Assessment Types
+
+| Code | Name |
+|---|---|
+| FA | Formative Assessment (monthly, highest priority) |
+| STEAM | STEAM Group Task |
+| WT | Writing Task |
+| SDL | Self-Directed Learning |
+| HW | Homework |
+| IA | Internal Assessment (all subjects) |
+| TOK | Theory of Knowledge |
+| EE | Extended Essay (Business Management HL) |
+| G11 | Grade 11 Finals (May–June 2026) |
+
+---
+
+## Deploy (PWA Dashboard)
+
+The dashboard auto-deploys to GitHub Pages on every push to `main` via GitHub Actions.
+
+To view: `https://sai-k27-0.github.io/Orbis`
+
+Local development — no build step needed:
+```bash
+open index.html   # or just double-click
+```
+
+---
+
+*Built with Claude Code · IB May 2027 session*

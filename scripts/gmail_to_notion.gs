@@ -2,7 +2,7 @@
 // Watches Gmail for school emails, creates tasks in Notion AND notes in Obsidian vault.
 
 var CONFIG = {
-  NOTION_API_TOKEN: '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',
+  NOTION_API_TOKEN: PropertiesService.getScriptProperties().getProperty('NOTION_API_TOKEN'),
   NOTION_TASKS_DB: '34a483ac-69ec-811b-ab6d-f4bdb283f187',
   LABEL_NAME: 'orbis-synced',
   OBSIDIAN_VAULT_NAME: 'Orbis Vault',
